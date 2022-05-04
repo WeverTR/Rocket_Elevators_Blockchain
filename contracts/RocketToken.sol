@@ -1,13 +1,14 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.4;
 
-import "@openzeppelin/contracts@4.6.0/token/ERC721/ERC721.sol";
-import "@openzeppelin/contracts@4.6.0/token/ERC721/extensions/ERC721Enumerable.sol";
-import "@openzeppelin/contracts@4.6.0/token/ERC721/extensions/ERC721URIStorage.sol";
-import "@openzeppelin/contracts@4.6.0/security/Pausable.sol";
-import "@openzeppelin/contracts@4.6.0/access/Ownable.sol";
-import "@openzeppelin/contracts@4.6.0/token/ERC721/extensions/ERC721Burnable.sol";
-import "@openzeppelin/contracts@4.6.0/utils/Counters.sol";
+import "@openzeppelin/contracts/token/ERC721/ERC721.sol";
+import "@openzeppelin/contracts/token/ERC721/extensions/ERC721Enumerable.sol";
+import "@openzeppelin/contracts/token/ERC721/extensions/ERC721URIStorage.sol";
+import "@openzeppelin/contracts/security/Pausable.sol";
+import "@openzeppelin/contracts/access/Ownable.sol";
+import "@openzeppelin/contracts/token/ERC721/extensions/ERC721Burnable.sol";
+import "@openzeppelin/contracts/utils/Counters.sol";
+import "@openzeppelin/contracts/token/ERC721/extensions/IERC721Metadata.sol";
 
 contract RocketTokenERC721 is ERC721, ERC721Enumerable, ERC721URIStorage, Pausable, Ownable, ERC721Burnable {
     using Counters for Counters.Counter;
@@ -23,6 +24,11 @@ contract RocketTokenERC721 is ERC721, ERC721Enumerable, ERC721URIStorage, Pausab
     constructor() ERC721("RocketToken", "ROCKET") {
         deployDate = block.timestamp;
     }
+
+    function _baseURI() internal pure override returns (string memory) {
+        return "https://j7pdzt8putp9.usemoralis.com:2053/server";
+    }
+
 
     function pause() public onlyOwner {
         _pause();
@@ -93,25 +99,24 @@ contract RocketTokenERC721 is ERC721, ERC721Enumerable, ERC721URIStorage, Pausab
         ];
     }
 
-    function twentyFourHoursPassed() public returns (bool) {
+    function twentyFourHoursPassed() public view returns (bool) {
         return (block.timestamp >= (deployDate + 24 hours));
     }
 
-    function giftToken(address receiver) public view returns (bool) {
-
-    }
-
     //Send token once per day to the receiver
-    function faucet(address receiver) public {
-        //Check if the receiver got tokens in the last 24hours
-
-
-        //Update the last timestamp of the receiver
-
-
-        //Mint 100 new tokens to the receiver
-
-
+    function dailyNFTGift(address receiver) public {
+        //Grab list of eligible addresses, check if the receiver got tokens in the last 24hours
+        freeEligible();
+        for (uint i = 0; i < addressList.length; i++) {
+            if (receiver == addressList[i] && twentyFourHoursPassed()) {
+                //Update from last timestamp
+                deployDate = block.timestamp;
+                //Mint 100 new tokens to the receiver
+                for (uint j = 0; j < 100; i++) {
+                    safeMint(addressList[i], tokenURI(_tokenIdCounter.current()));
+                    _tokenIdCounter.increment();
+                }
+            }
+        }
     }
-
 }
