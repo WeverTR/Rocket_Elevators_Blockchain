@@ -1,19 +1,28 @@
 // SPDX-License-Identifier: MIT
-pragma solidity ^0.8.13;
+pragma solidity ^0.8.4;
 
-import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
-import "@openzeppelin/contracts/token/ERC20/extensions/ERC20Burnable.sol";
-import "@openzeppelin/contracts/security/Pausable.sol";
-import "@openzeppelin/contracts/access/Ownable.sol";
-import "@openzeppelin/contracts/token/ERC20/extensions/draft-ERC20Permit.sol";
+import "@openzeppelin/contracts@4.6.0/token/ERC721/ERC721.sol";
+import "@openzeppelin/contracts@4.6.0/token/ERC721/extensions/ERC721Enumerable.sol";
+import "@openzeppelin/contracts@4.6.0/token/ERC721/extensions/ERC721URIStorage.sol";
+import "@openzeppelin/contracts@4.6.0/security/Pausable.sol";
+import "@openzeppelin/contracts@4.6.0/access/Ownable.sol";
+import "@openzeppelin/contracts@4.6.0/token/ERC721/extensions/ERC721Burnable.sol";
+import "@openzeppelin/contracts@4.6.0/utils/Counters.sol";
 
-contract RocketToken is ERC20, ERC20Burnable, Pausable, Ownable, ERC20Permit {
-    constructor() ERC20("RocketToken", "ROCKET") ERC20Permit("RocketToken") {
-        _mint(msg.sender, 100000);
-    }
+contract RocketTokenERC721 is ERC721, ERC721Enumerable, ERC721URIStorage, Pausable, Ownable, ERC721Burnable {
+    using Counters for Counters.Counter;
+
+    Counters.Counter private _tokenIdCounter;
 
     address[] addressList;
+    uint public balanceReceived;
+    uint deployDate;
+
     mapping(address => bool) public hasReceivedFreeNFT;
+
+    constructor() ERC721("RocketToken", "ROCKET") {
+        deployDate = block.timestamp;
+    }
 
     function pause() public onlyOwner {
         _pause();
@@ -23,30 +32,86 @@ contract RocketToken is ERC20, ERC20Burnable, Pausable, Ownable, ERC20Permit {
         _unpause();
     }
 
-    function mint(address to, uint256 amount) public onlyOwner {
-        _mint(to, amount);
+    function safeMint(address to, string memory uri) public onlyOwner {
+        uint256 tokenId = _tokenIdCounter.current();
+        _tokenIdCounter.increment();
+        _safeMint(to, tokenId);
+        _setTokenURI(tokenId, uri);
     }
 
-    function _beforeTokenTransfer(address from, address to, uint256 amount)
+    function _beforeTokenTransfer(address from, address to, uint256 tokenId)
         internal
         whenNotPaused
-        override
+        override(ERC721, ERC721Enumerable)
     {
-        super._beforeTokenTransfer(from, to, amount);
+        super._beforeTokenTransfer(from, to, tokenId);
+    }
+
+    // The following functions are overrides required by Solidity.
+
+    function _burn(uint256 tokenId) internal override(ERC721, ERC721URIStorage) {
+        super._burn(tokenId);
+    }
+
+    function tokenURI(uint256 tokenId)
+        public
+        view
+        override(ERC721, ERC721URIStorage)
+        returns (string memory)
+    {
+        return super.tokenURI(tokenId);
+    }
+
+    function supportsInterface(bytes4 interfaceId)
+        public
+        view
+        override(ERC721, ERC721Enumerable)
+        returns (bool)
+    {
+        return super.supportsInterface(interfaceId);
+    }
+
+    function receiveMoney() public payable {
+        balanceReceived += msg.value;
+    }
+
+    function getBalance() public view returns(uint) {
+        return address(this).balance;
+    }
+
+    function withdrawMoney() public {
+        address payable to = payable(msg.sender);
+        to.transfer(getBalance());
     }
 
     function freeEligible() public onlyOwner {
         addressList =  [
-            0xA55488F58133024975379F47dF9CDf46B7521C6A,
-            0x700439557c41B81b964944675ea370cD82De0B5f,
-            0x9963872CB0Cb9aE104E8AeB0A9468Cf11bd50328,
-            0xF1057904e38A0315860794954Ce7f72f6C5ec60e,
-            0x8d4C45081FA8C87475503112ecc0b3B79E324a1D,
-            0xe5221820e2E570EDA5a11F524933fB75Db765Bc2,
-            0xf142564BfBeEF7E37e231bF7227fc71aC3295c9e,
-            0x95c1De73A8c0dC10559000Dd886978E3097d2F2a,
-            0xe6722FE33c0c7A6DfcAE19C996Be01eF9B178400,
-            0x23092057ccD46b1a27a9a115B4AbeBB932c18050 
+            0xd1679bB3543e8aD195FF9f3Ac3436039bA389237,
+            0xF4F555ca1586C40067cd215578f123d30813De02,
+            0x5563D3361408D41BF172E3720C30b0e35F19A444,
+            0x6ffdAf0795D208c11C583C88Cb5dbd2A8955A59e
         ];
     }
+
+    function twentyFourHoursPassed() public returns (bool) {
+        return (block.timestamp >= (deployDate + 24 hours));
+    }
+
+    function giftToken(address receiver) public view returns (bool) {
+
+    }
+
+    //Send token once per day to the receiver
+    function faucet(address receiver) public {
+        //Check if the receiver got tokens in the last 24hours
+
+
+        //Update the last timestamp of the receiver
+
+
+        //Mint 100 new tokens to the receiver
+
+
+    }
+
 }
