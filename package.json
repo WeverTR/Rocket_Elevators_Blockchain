@@ -1,5 +1,5 @@
 {
-  "name": "tutorialtoken",
+  "name": "rocketnftapi",
   "version": "1.0.0",
   "description": "",
   "main": "truffle.js",
@@ -7,8 +7,7 @@
     "test": "test"
   },
   "scripts": {
-    "start": "node app.js",
-    "build": "webpack"
+    "start": "node app.js"
   },  
   "author": "",
   "license": "ISC",
