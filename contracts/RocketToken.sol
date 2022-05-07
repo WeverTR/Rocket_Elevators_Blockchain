@@ -15,6 +15,7 @@ contract RocketToken is ERC721, ERC721Enumerable, ERC721URIStorage, Pausable, Ow
 
     Counters.Counter private _tokenIdCounter;
 
+    address RocketTokenERC20Address = 0x5B38Da6a701c568545dCfcB03FcB875f56beddC4;
     address[] addressList;
     uint public balanceReceived;
     uint deployDate;
@@ -114,5 +115,18 @@ contract RocketToken is ERC721, ERC721Enumerable, ERC721URIStorage, Pausable, Ow
                 hasReceivedFreeNFT[receiver] = true;
             }
         }
+    }
+
+    function mintROCKET_ERC20(address to, string memory uri)
+        public onlyOwner
+        returns (uint256)
+    {
+        uint256 tokenId = _tokenIdCounter.current();
+        _tokenIdCounter.increment();
+
+        _mint(to, tokenId);
+        _setTokenURI(tokenId, uri);
+
+        return tokenId;
     }
 }

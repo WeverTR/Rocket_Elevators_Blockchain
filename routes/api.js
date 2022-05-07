@@ -6,8 +6,10 @@ const fs = require('fs');
 const mnemonic = fs.readFileSync(".secret").toString().trim();
 var contractJson = require('../build/contracts/RocketTokenERC721.json');
 var Web3 = require('web3')
+var utils = require('web3-utils')
+const provider = new HDWalletProvider(mnemonic, `http://localhost:8545`);
 var Contract = require('web3-eth-contract');
-Contract.setProvider(new HDWalletProvider(mnemonic, `http://localhost:8545`));
+Contract.setProvider(provider);
 var PORT = 3000;
 
 /* import moralis */
@@ -22,7 +24,7 @@ const masterKey = process.env.MORALIS_MASTER;
 Moralis.start({ serverUrl, appId, masterKey });
 
 var contract = new Contract(contractJson.abi, "0x6097d97967a5906e0713b1f1a5f8e272fF9Fbe7a");
-const web3 = new Web3(new Web3.providers.HttpProvider('http://127.0.0.1:8545'))
+const web3 = new Web3(provider);
 
 // /* Return something */
 // app.get('/test', function(req, res, next) {
@@ -105,23 +107,32 @@ app.get('/getNFTmetadatabyaddress/:address', function(req, res) {
 
 
 // Creating a randomly generated image containing NFT data
-app.get('/mintNFT', async function(req, res) {
-   console.log("POST Request Called for  endpoint")
-   res.send("POST Request Called")
+app.post('/mintNFT', async function(req, res) {
 
    try {
-       let accounts = await getAccounts();
+       let accounts = await web3.eth.getAccounts();
        let wallet = accounts[0];
-       const walletAddress = req.params.walletAddress;
-       let tokenID = _tokenIdCounter.current();
-       await contract.safeMint(walletAddress, "").send({from: wallet, gas: 5500000});
+       const tokenId = await contract.methods.safeMint(wallet, "").on('receipt', function(receipt) {
+            const tokenId = utils.hexToNumber(receipt.logs[0].topics[3])
+            });
 
-       let image = await generateImage();
-       let imageURI = await uploadToIPFS(image, `RocketElevatorsNFTImage_${tokenID}.png`);
-       let metadata = writeMetadata(tokenID, imageURI);
-       let tokenURI = await uploadToIPFS(metadata, `RocketElevatorsNFTImage_${tokenID}.json`);
+        // let image = await generateImage();
+        // let imageURI = await uploadToIPFS(image, `RocketElevatorsNFTImage_${tokenId}.png`);
+        // let metadata = writeMetadata(tokenID, imageURI);
+        // let tokenURI = await uploadToIPFS(metadata, `RocketElevatorsNFTImage_${tokenId}.json`);
 
-       res.json(tokenURI);
+        console.log(tokenId);
+
+        // .send({from: wallet, gas: 5500000}).on('receipt', function(receipt) {
+        //     const tokenId = utils.hexToNumber(receipt.logs[0].topics[3])
+        //     });
+
+    //    let image = await generateImage();
+    //    let imageURI = await uploadToIPFS(image, `RocketElevatorsNFTImage_${tokenID}.png`);
+    //    let metadata = writeMetadata(tokenID, imageURI);
+    //    let tokenURI = await uploadToIPFS(metadata, `RocketElevatorsNFTImage_${tokenID}.json`);
+
+    //    res.json(tokenURI);
    } catch(err) {
         console.log(err);
         res.status(400).send({
