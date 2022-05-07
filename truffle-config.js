@@ -1,6 +1,7 @@
 const HDWalletProvider = require('@truffle/hdwallet-provider');
 const fs = require('fs');
 const mnemonic = fs.readFileSync(".secret").toString().trim();
+require('dotenv').config();
 
 module.exports = {
   networks: {
@@ -10,7 +11,7 @@ module.exports = {
       network_id: "*",       // Any network (default: none)
     },
     matic: {
-      provider: () => new HDWalletProvider(mnemonic, `https://j7pdzt8putp9.usemoralis.com:2053/server`),
+      provider: () => new HDWalletProvider(mnemonic, process.env.MORALIS_URL),
       network_id: 80001,
       confirmations: 2,
       timeoutBlocks: 200,

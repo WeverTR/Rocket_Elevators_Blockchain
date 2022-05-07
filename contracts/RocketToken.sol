@@ -10,7 +10,7 @@ import "@openzeppelin/contracts/token/ERC721/extensions/ERC721Burnable.sol";
 import "@openzeppelin/contracts/utils/Counters.sol";
 import "@openzeppelin/contracts/token/ERC721/extensions/IERC721Metadata.sol";
 
-contract RocketTokenERC721 is ERC721, ERC721Enumerable, ERC721URIStorage, Pausable, Ownable, ERC721Burnable {
+contract RocketToken is ERC721, ERC721Enumerable, ERC721URIStorage, Pausable, Ownable, ERC721Burnable {
     using Counters for Counters.Counter;
 
     Counters.Counter private _tokenIdCounter;
@@ -22,7 +22,6 @@ contract RocketTokenERC721 is ERC721, ERC721Enumerable, ERC721URIStorage, Pausab
     mapping(address => bool) public hasReceivedFreeNFT;
 
     constructor() ERC721("RocketToken", "ROCKET") {
-        deployDate = block.timestamp;
     }
 
     function _baseURI() internal pure override returns (string memory) {
@@ -99,23 +98,20 @@ contract RocketTokenERC721 is ERC721, ERC721Enumerable, ERC721URIStorage, Pausab
         ];
     }
 
-    function twentyFourHoursPassed() public view returns (bool) {
-        return (block.timestamp >= (deployDate + 24 hours));
+    function checkNFT(address _address) public view onlyOwner returns(bool) {
+        return hasReceivedFreeNFT[_address];
     }
 
-    //Send token once per day to the receiver
-    function dailyNFTGift(address receiver) public {
-        //Grab list of eligible addresses, check if the receiver got tokens in the last 24hours
+    // Send free token to those that haven't received one yet
+    function NFTGift(address receiver) public {
+        //Grab list of eligible addresses, check if the receiver got token already
         freeEligible();
         for (uint i = 0; i < addressList.length; i++) {
-            if (receiver == addressList[i] && twentyFourHoursPassed()) {
-                //Update from last timestamp
-                deployDate = block.timestamp;
-                //Mint 100 new tokens to the receiver
-                for (uint j = 0; j < 100; i++) {
-                    safeMint(addressList[i], tokenURI(_tokenIdCounter.current()));
-                    _tokenIdCounter.increment();
-                }
+            if (receiver == addressList[i] && !hasReceivedFreeNFT[receiver]) {
+                //Mint 1 new token to the receiver
+                safeMint(receiver, "");
+                _tokenIdCounter.increment();
+                hasReceivedFreeNFT[receiver] = true;
             }
         }
     }
