@@ -3,16 +3,6 @@ var express = require('express');
 var path = require('path');
 var cookieParser = require('cookie-parser');
 var logger = require('morgan');
-const mergeImages = require('merge-images');
-const { Canvas, Image } = require('canvas');
-const axios = require('axios').default;
-require('web3-eth-contract');
-var contractJson = require('../build/contracts/RocketTokenERC721.json');
-var Web3 = require('web3');
-var utils = require('web3-utils');
-const HDWalletProvider = require('@truffle/hdwallet-provider');
-const fs = require('fs');
-require('dotenv').config();
 
 var indexRouter = require('./routes/index');
 var usersRouter = require('./routes/users');
@@ -49,8 +39,5 @@ app.use(function(err, req, res, next) {
   res.status(err.status || 500);
   res.render('error');
 });
-
-app.listen(process.env.PORT || 3000, 
-	() => console.log("Server is running..."));
 
 module.exports = app;
