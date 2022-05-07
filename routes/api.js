@@ -5,6 +5,7 @@ const HDWalletProvider = require('@truffle/hdwallet-provider');
 const fs = require('fs');
 const mnemonic = fs.readFileSync(".secret").toString().trim();
 var contractJson = require('../build/contracts/RocketTokenERC721.json');
+var Web3 = require('web3')
 var Contract = require('web3-eth-contract');
 Contract.setProvider(new HDWalletProvider(mnemonic, `http://localhost:8545`));
 var PORT = 3000;
@@ -21,6 +22,7 @@ const masterKey = process.env.MORALIS_MASTER;
 Moralis.start({ serverUrl, appId, masterKey });
 
 var contract = new Contract(contractJson.abi, "0x6097d97967a5906e0713b1f1a5f8e272fF9Fbe7a");
+const web3 = new Web3(new Web3.providers.HttpProvider('http://127.0.0.1:8545'))
 
 // /* Return something */
 // app.get('/test', function(req, res, next) {
@@ -103,7 +105,7 @@ app.get('/getNFTmetadatabyaddress/:address', function(req, res) {
 
 
 // Creating a randomly generated image containing NFT data
-app.post('/mintNFT', async function(req, res) {
+app.get('/mintNFT', async function(req, res) {
    console.log("POST Request Called for  endpoint")
    res.send("POST Request Called")
 
