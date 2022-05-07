@@ -1,33 +1,39 @@
 {
-  "name": "rocketnftapi",
+  "name": "rocket_elevators_blockchain",
   "version": "1.0.0",
   "description": "",
-  "main": "truffle.js",
+  "main": "app.js",
   "directories": {
     "test": "test"
   },
   "scripts": {
-    "start": "node app.js"
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/WeverTR/Rocket_Elevators_Blockchain.git"
   },
   "author": "",
   "license": "ISC",
-  "devDependencies": {
-    "lite-server": "^2.3.0"
+  "bugs": {
+    "url": "https://github.com/WeverTR/Rocket_Elevators_Blockchain/issues"
   },
+  "homepage": "https://github.com/WeverTR/Rocket_Elevators_Blockchain#readme",
   "dependencies": {
-    "@openzeppelin/contracts": "^4.6.0",
     "@truffle/hdwallet-provider": "^2.0.8",
     "axios": "^0.27.2",
+    "bcrypt": "^5.0.1",
     "canvas": "^2.9.1",
     "cookie-parser": "^1.4.6",
     "dependencies": "^0.0.1",
     "dotenv": "^16.0.0",
-    "ejs": "^3.1.7",
+    "express": "^4.18.1",
+    "fs": "^0.0.1-security",
     "http-errors": "^2.0.0",
-    "jade": "^0.29.0",
     "merge-images": "^2.0.0",
     "moralis": "^1.6.0",
     "morgan": "^1.10.0",
+    "node-pre-gyp": "^0.17.0",
     "web3": "^1.7.3",
     "web3-utils": "^1.7.3"
   }
