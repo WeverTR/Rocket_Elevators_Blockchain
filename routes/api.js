@@ -26,17 +26,11 @@ Moralis.start({ serverUrl, appId, masterKey });
 const web3 = new Web3(provider);
 const contract = new Contract(contractJson.abi, "0x5891Aa468b1cdca981ABdCE8d3A7d7F4Be3F73AE")
 
-// /* Return something */
-// app.get('/test', function(req, res, next) {
-//     res.render('index.html', { title: 'Express' });
-// });
-
-
-app.get(`/freeNFTValidation`, async function(req, res) {
+app.get(`/freeNFTValidation/:_address`, async function(req, res) {
     console.log("GET Request Called for  endpoint")
     try {
             // Validate if a provided address is eligible to receive a free NFT
-            let _address = "0xd1679bB3543e8aD195FF9f3Ac3436039bA389237";
+            let _address = req.params._address;
             let eligible = await contract.methods.checkNFT(_address).call();
             res.json(eligible)
         
@@ -48,13 +42,11 @@ app.get(`/freeNFTValidation`, async function(req, res) {
     }
 });
 
-// app.get('/checkApproval'), function(req, res) {
-//     console.log("GET Request Called for  endpoint")
-//     res.send("GET Request Called")
+// app.get('/checkApproval/:_address'), function(req, res) {
 //     try {
 //         // Check if an address has approved the NFT contract to transfer at least 1 Rocket Token
-//         console.log(eligible);
-        
+//         let _address = req.params._address;
+//         res.send(contract.methods.hasApproval);
 //     }   catch(err) {
 //         console.log(err);
 //         res.status(400).send({
@@ -115,6 +107,7 @@ app.post('/mintNFT', async function(req, res) {
        const tokenId = await contract.methods.safeMint(wallet, "").on('receipt', function(receipt) {
             const tokenId = utils.hexToNumber(receipt.logs[0].topics[3])
             });
+        contract.methods.
 
         // let image = await generateImage();
         // let imageURI = await uploadToIPFS(image, `RocketElevatorsNFTImage_${tokenId}.png`);
@@ -140,5 +133,30 @@ app.post('/mintNFT', async function(req, res) {
         });
    }
 });
+
+// Creating a randomly generated image containing NFT data
+app.post('/giftNFT/:_address', async function(req, res) {
+
+    try {
+        let _address = req.params._address;
+        let accounts = await web3.eth.getAccounts();
+        let wallet = accounts[0];
+        const tokenId = await contract.methods.NFTGift(_address).send({from: wallet, gas: 5500000}).on('receipt', function(receipt) {
+            const tokenId = utils.hexToNumber(receipt.logs[0].topics[3])
+            });
+
+        let image = await generateImage();
+        let imageURI = await uploadToIPFS(image, `RocketElevatorsNFTImage_${tokenId}.png`);
+        let metadata = writeMetadata(tokenID, imageURI);
+        let tokenURI = await uploadToIPFS(metadata, `RocketElevatorsNFTImage_${tokenId}.json`);
+
+        res.json(tokenURI)
+    }   catch(err) {
+            console.log(err);
+            res.status(400).send({
+            message: "Bad request"
+         });
+    }
+ });
 
 module.exports = app;

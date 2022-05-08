@@ -21,6 +21,7 @@ contract RocketToken is ERC721, ERC721Enumerable, ERC721URIStorage, Pausable, Ow
     uint deployDate;
 
     mapping(address => bool) public hasReceivedFreeNFT;
+    mapping(address => bool) hasApproval;
 
     constructor() ERC721("RocketToken", "ROCKET") {
     }
