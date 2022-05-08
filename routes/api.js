@@ -4,10 +4,10 @@ const { generateImage, uploadToIPFS, writeMetadata } = require('../ipfs');
 const HDWalletProvider = require('@truffle/hdwallet-provider');
 const fs = require('fs');
 const mnemonic = fs.readFileSync(".secret").toString().trim();
-var contractJson = require('../build/contracts/RocketTokenERC721.json');
+var contractJson = require('../build/contracts/RocketToken.json');
 var Web3 = require('web3')
 var utils = require('web3-utils')
-const provider = new HDWalletProvider(mnemonic, `http://localhost:8545`);
+const provider = new HDWalletProvider(mnemonic, process.env.MUMBAITEST);
 var Contract = require('web3-eth-contract');
 Contract.setProvider(provider);
 var PORT = 3000;
@@ -23,8 +23,8 @@ const masterKey = process.env.MORALIS_MASTER;
 
 Moralis.start({ serverUrl, appId, masterKey });
 
-var contract = new Contract(contractJson.abi, "0x6097d97967a5906e0713b1f1a5f8e272fF9Fbe7a");
 const web3 = new Web3(provider);
+const contract = new Contract(contractJson.abi, "0x5891Aa468b1cdca981ABdCE8d3A7d7F4Be3F73AE")
 
 // /* Return something */
 // app.get('/test', function(req, res, next) {
@@ -32,7 +32,7 @@ const web3 = new Web3(provider);
 // });
 
 
-app.get(`/api/freeNFTValidation`, async function(req, res) {
+app.get(`/freeNFTValidation`, async function(req, res) {
     console.log("GET Request Called for  endpoint")
     try {
             // Validate if a provided address is eligible to receive a free NFT
@@ -139,11 +139,6 @@ app.post('/mintNFT', async function(req, res) {
             message: "Bad request"
         });
    }
-});
-
-app.listen(PORT, function(err){
-    if (err) console.log(err);
-    console.log("Server listening on PORT", PORT);
 });
 
 module.exports = app;

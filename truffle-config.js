@@ -11,7 +11,7 @@ module.exports = {
       network_id: "*",       // Any network (default: none)
     },
     matic: {
-      provider: () => new HDWalletProvider(mnemonic, process.env.MORALIS_URL),
+      provider: () => new HDWalletProvider(mnemonic, process.env.MUMBAITEST),
       network_id: 80001,
       confirmations: 2,
       timeoutBlocks: 200,

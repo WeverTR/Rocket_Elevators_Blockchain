@@ -20,7 +20,8 @@
   },
   "homepage": "https://github.com/WeverTR/Rocket_Elevators_Blockchain#readme",
   "dependencies": {
-    "@truffle/hdwallet-provider": "^2.0.8",
+    "@openzeppelin/contracts": "^4.6.0",
+    "@truffle/hdwallet-provider": "^1.7.0",
     "axios": "^0.27.2",
     "bcrypt": "^5.0.1",
     "canvas": "^2.9.1",
@@ -30,11 +31,14 @@
     "express": "^4.18.1",
     "fs": "^0.0.1-security",
     "http-errors": "^2.0.0",
+    "jade": "^1.9.2",
     "merge-images": "^2.0.0",
     "moralis": "^1.6.0",
     "morgan": "^1.10.0",
     "node-pre-gyp": "^0.17.0",
+    "truffle": "^5.5.13",
     "web3": "^1.7.3",
+    "web3-eth-contract": "^1.7.3",
     "web3-utils": "^1.7.3"
   }
 }
