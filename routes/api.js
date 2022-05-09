@@ -26,7 +26,7 @@ Moralis.start({ serverUrl, appId, masterKey });
 const web3 = new Web3(provider);
 const contract = new Contract(contractJson.abi, "0x5891Aa468b1cdca981ABdCE8d3A7d7F4Be3F73AE")
 
-app.get(`/freeNFTValidation/:_address`, async function(req, res) {
+app.get(`/freeNFTValidation/`, async function(req, res) {
     console.log("GET Request Called for  endpoint")
     try {
             // Validate if a provided address is eligible to receive a free NFT
