@@ -24,14 +24,21 @@ const masterKey = process.env.MORALIS_MASTER;
 Moralis.start({ serverUrl, appId, masterKey });
 
 const web3 = new Web3(provider);
-const contract = new Contract(contractJson.abi, "0x5891Aa468b1cdca981ABdCE8d3A7d7F4Be3F73AE")
+const contract = new Contract(contractJson.abi, process.env.ROCKETTOKENERC721CONTRACT_ADDRESS);
+
+app.get(`/test`, async function(req, res) {
+    const x = await web3.eth.defaultAccount;
+    console.log(x);
+});
 
 app.get(`/freeNFTValidation/:_address`, async function(req, res) {
     console.log("GET Request Called for  endpoint")
     try {
             // Validate if a provided address is eligible to receive a free NFT
+            let accounts = await web3.eth.getAccounts();
+            let wallet = accounts[0];
             let _address = req.params._address;
-            let eligible = await contract.methods.checkNFT(_address).call();
+            let eligible = await contract.methods.checkNFT(_address).call({from: wallet});
             res.json(eligible)
         
     }   catch(err) {
@@ -42,31 +49,33 @@ app.get(`/freeNFTValidation/:_address`, async function(req, res) {
     }
 });
 
-// app.get('/checkApproval/:_address'), function(req, res) {
-//     try {
-//         // Check if an address has approved the NFT contract to transfer at least 1 Rocket Token
-//         let _address = req.params._address;
-//         res.send(contract.methods.hasApproval);
-//     }   catch(err) {
-//         console.log(err);
-//         res.status(400).send({
-//         message: "Invalid address"
-//         });
-//     }
-// }
+app.get('/checkApproval/:_address'), function(req, res) {
+    try {
+        // Check if an address has approved the NFT contract to transfer at least 1 Rocket Token
+        let _address = req.params._address;
+        res.send(contract.methods.hasApproval);
+    }   catch(err) {
+        console.log(err);
+        res.status(400).send({
+        message: "Invalid address"
+        });
+    }
+}
 
-app.get(`/getNFTsbyaddresses/:_address`, function(req, res) {
-    console.log("GET Request Called for  endpoint")
-    res.send("GET Request Called")
-
+app.get(`/getNFTsbyaddress/:_address`, async function(req, res) {
     try {
         // Fetch the list of Rocket Elevators NFTs owned by a specific address
         const _address = req.params._address;
-        const options = {
-            address: _address,
-        };
-        let x = Moralis.Web3API.account.getNFTs(options);
-        console.log(x);
+        const transactions = Moralis.Object.extend("PolygonTransactions");
+        const query = new Moralis.Query(transactions);
+        await query.equalTo("from_address", _address);
+        let list = [];
+        const results = await query.find({ useMasterKey: true });
+        console.log("Successfully retrieved " + results.length + " NFTs.");
+        for (let i = 0; i < results.length; i++) {
+            list.push(results[i]);
+        }
+        res.json(list);
         
     }   catch(err) {
         console.log(err);
@@ -76,25 +85,23 @@ app.get(`/getNFTsbyaddresses/:_address`, function(req, res) {
     }
 });
 
-app.get('/getNFTmetadatabyaddress/:address', function(req, res) {
-    console.log("GET Request Called for  endpoint")
-    res.send("GET Request Called")
-
+app.get('/getNFTmetadatabyaddress/:_address', async function(req, res, _address) {
     try {
-        // get metadata of NFT
-        let accounts =  web3.eth.getAccounts();
-        let wallet = accounts[0];
-        const options = {
-            address: wallet,
-          };
-          const metaData =  Moralis.Web3API.token.getNFTMetadata(options);
-        
-    }   catch(err) {
-        console.log(err);
-        res.status(400).send({
-        message: "Invalid address"
-        });
-    }
+            const _address = req.params._address;
+            const transfers = Moralis.Object.extend("PolygonNFTTransfers");
+            const query = new Moralis.Query(transfers);
+            await query.equalTo("from_address", _address);
+            await query.exists("IPFS");
+            const results = await query.find();
+            // get metadata of NFT
+            res.json(query);
+        }
+           catch(err) {
+                console.log(err);
+                res.status(400).send({
+                message: "Invalid ID"
+                });
+            }
 });
 
 
@@ -102,31 +109,40 @@ app.get('/getNFTmetadatabyaddress/:address', function(req, res) {
 app.post('/mintNFT', async function(req, res) {
 
    try {
-       let accounts = await web3.eth.getAccounts();
-       let wallet = accounts[0];
-       const tokenId = await contract.methods.safeMint(wallet, "").on('receipt', function(receipt) {
-            const tokenId = utils.hexToNumber(receipt.logs[0].topics[3])
+        const PolygonNFTTransfers = Moralis.Object.extend("PolygonNFTTransfers");
+        const polygonNFTTransfers = new PolygonNFTTransfers();
+
+        let accounts = await web3.eth.getAccounts();
+        let wallet = accounts[0];
+        let tokenId;
+        let tokenAddress;
+        await contract.methods.safeMint(wallet, "").send({from: wallet, gas: 5500000})
+        .on('receipt', function(receipt) {
+            tokenId = receipt.events.Transfer.returnValues.tokenId;
             });
-        contract.methods.
+        
+        let image = await generateImage();
+        let imageURI = await uploadToIPFS(image, `RocketElevatorsNFTImage_${tokenId}.png`);
+        let metadata = writeMetadata(tokenId, imageURI);
+        let tokenURI = await uploadToIPFS(metadata, `RocketElevatorsNFTImage_${tokenId}.json`);
+        
+        let B64ToJsonObj = JSON.parse(Buffer.from(metadata, 'base64'));
+        
+        console.log(B64ToJsonObj);
+        // polygonNFTTransfers.set("IPFS", B64ToJsonObj);
 
-        // let image = await generateImage();
-        // let imageURI = await uploadToIPFS(image, `RocketElevatorsNFTImage_${tokenId}.png`);
-        // let metadata = writeMetadata(tokenID, imageURI);
-        // let tokenURI = await uploadToIPFS(metadata, `RocketElevatorsNFTImage_${tokenId}.json`);
-
-        console.log(tokenId);
-
-        // .send({from: wallet, gas: 5500000}).on('receipt', function(receipt) {
-        //     const tokenId = utils.hexToNumber(receipt.logs[0].topics[3])
-        //     });
-
-    //    let image = await generateImage();
-    //    let imageURI = await uploadToIPFS(image, `RocketElevatorsNFTImage_${tokenID}.png`);
-    //    let metadata = writeMetadata(tokenID, imageURI);
-    //    let tokenURI = await uploadToIPFS(metadata, `RocketElevatorsNFTImage_${tokenID}.json`);
-
-    //    res.json(tokenURI);
-   } catch(err) {
+        // polygonNFTTransfers.save(null, {useMasterKey: true}).then(
+        // (polygonNFTTransfers) => {
+        //     // Execute any logic that should take place after the object is saved.
+        //     console.log("New object created with objectId: " + polygonNFTTransfers.id);
+        // },
+        // (error) => {
+        //     // Execute any logic that should take place if the save fails.
+        //     // error is a Moralis.Error with an error code and message.
+        //     console.log("Failed to create new object, with error code: " + error.message);
+        // });
+        res.json(tokenURI);
+    } catch(err) {
         console.log(err);
         res.status(400).send({
             message: "Bad request"
@@ -134,23 +150,25 @@ app.post('/mintNFT', async function(req, res) {
    }
 });
 
-// Creating a randomly generated image containing NFT data
+// Creating a randomly generated image containing NFT data and gifting it to an address
 app.post('/giftNFT/:_address', async function(req, res) {
 
     try {
         let _address = req.params._address;
         let accounts = await web3.eth.getAccounts();
         let wallet = accounts[0];
-        const tokenId = await contract.methods.NFTGift(_address).send({from: wallet, gas: 5500000}).on('receipt', function(receipt) {
-            const tokenId = utils.hexToNumber(receipt.logs[0].topics[3])
+        const tokenId = await contract.methods.NFTGift(_address).send({from: wallet, gas: 5500000})
+        .on('receipt', function(receipt) {
+            tokenId = receipt.events.Transfer.returnValues.tokenId;
             });
-
+        
         let image = await generateImage();
         let imageURI = await uploadToIPFS(image, `RocketElevatorsNFTImage_${tokenId}.png`);
-        let metadata = writeMetadata(tokenID, imageURI);
+        let metadata = writeMetadata(tokenId, imageURI);
         let tokenURI = await uploadToIPFS(metadata, `RocketElevatorsNFTImage_${tokenId}.json`);
 
-        res.json(tokenURI)
+        console.log(tokenURI);
+        res.json(tokenURI);
     }   catch(err) {
             console.log(err);
             res.status(400).send({

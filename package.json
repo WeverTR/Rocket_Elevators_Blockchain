@@ -6,24 +6,31 @@
     "start": "node ./bin/www"
   },
   "dependencies": {
-    "cookie-parser": "~1.4.4",
-    "debug": "~2.6.9",
-    "express": "~4.16.1",
-    "http-errors": "~1.6.3",
-    "jade": "~1.11.0",
-    "morgan": "~1.9.1",
+    "@maticnetwork/maticjs": "^3.3.0",
+    "@maticnetwork/walletconnect-provider": "^0.0.1-beta.1",
     "@openzeppelin/contracts": "^4.6.0",
     "@truffle/hdwallet-provider": "^1.7.0",
     "axios": "^0.27.2",
     "canvas": "^2.9.1",
+    "cookie-parser": "~1.4.4",
+    "debug": "~2.6.9",
     "dependencies": "^0.0.1",
     "dotenv": "^16.0.0",
+    "express": "~4.16.1",
     "fs": "^0.0.1-security",
+    "http-errors": "~1.6.3",
+    "jade": "~1.11.0",
     "merge-images": "^2.0.0",
+    "meta-auth": "^1.1.2",
     "moralis": "^1.6.0",
+    "morgan": "~1.9.1",
     "truffle": "^5.1.67",
+    "truffle-flattener": "^1.6.0",
     "web3": "^1.7.3",
     "web3-eth-contract": "^1.7.3",
     "web3-utils": "^1.7.3"
+  },
+  "devDependencies": {
+    "truffle-plugin-verify": "^0.5.25"
   }
 }

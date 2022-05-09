@@ -29,5 +29,11 @@ module.exports = {
     solc: {
       version: "^0.8.4"
     }
+  },
+  plugins: [
+    'truffle-plugin-verify'
+  ],
+  api_keys: {
+    polygonscan: "XGJPSTNFKPUIAYCYXT1TA237VKPU89NBD8"
   }
 }
