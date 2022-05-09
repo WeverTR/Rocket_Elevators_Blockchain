@@ -129,18 +129,7 @@ app.post('/mintNFT', async function(req, res) {
         let B64ToJsonObj = JSON.parse(Buffer.from(metadata, 'base64'));
         
         console.log(B64ToJsonObj);
-        // polygonNFTTransfers.set("IPFS", B64ToJsonObj);
-
-        // polygonNFTTransfers.save(null, {useMasterKey: true}).then(
-        // (polygonNFTTransfers) => {
-        //     // Execute any logic that should take place after the object is saved.
-        //     console.log("New object created with objectId: " + polygonNFTTransfers.id);
-        // },
-        // (error) => {
-        //     // Execute any logic that should take place if the save fails.
-        //     // error is a Moralis.Error with an error code and message.
-        //     console.log("Failed to create new object, with error code: " + error.message);
-        // });
+        polygonNFTTransfers.set("IPFS", B64ToJsonObj).save({useMasterKey: true});
         res.json(tokenURI);
     } catch(err) {
         console.log(err);
